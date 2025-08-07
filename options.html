@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Calendar Sync - Options</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Canvas Calendar Sync - Options</h1>
+        
+        <!-- Canvas Configuration -->
+        <div class="section">
+            <h2>Canvas Configuration</h2>
+            <div class="form-group">
+                <label for="canvas-domain">Canvas Domain:</label>
+                <input type="text" id="canvas-domain" placeholder="e.g., yourschool.instructure.com">
+                <small>Enter your institution's Canvas domain (without https://)</small>
+            </div>
+        </div>
+
+        <!-- Google Calendar Configuration -->
+        <div class="section">
+            <h2>Google Calendar Configuration</h2>
+            <div class="form-group">
+                <label for="calendar-select">Target Calendar:</label>
+                <select id="calendar-select">
+                    <option value="primary">Primary Calendar</option>
+                </select>
+                <small>Select which calendar to sync assignments to</small>
+            </div>
+        </div>
+
+        <!-- Sync Settings -->
+        <div class="section">
+            <h2>Sync Settings</h2>
+            <div class="form-group">
+                <label for="sync-frequency">Sync Frequency:</label>
+                <select id="sync-frequency">
+                    <option value="manual">Manual only</option>
+                    <option value="hourly">Every hour</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="include-completed">
+                    Include completed assignments
+                </label>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="overwrite-existing">
+                    Overwrite existing calendar events
+                </label>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button id="save-options-btn" class="primary">Save Settings</button>
+            <button id="reset-options-btn">Reset to Defaults</button>
+        </div>
+
+        <!-- Status -->
+        <div id="status-message" class="status-message hidden"></div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>

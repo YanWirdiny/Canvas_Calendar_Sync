@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Calendar Sync</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Canvas Calendar Sync</h1>
+        
+        <!-- Canvas Authentication Section -->
+        <div class="auth-section">
+            <h2>Canvas</h2>
+            <div class="auth-item">
+                <div class="auth-header">
+                    <span>Status:</span>
+                    <span id="canvas-status" class="status">Not connected</span>
+                </div>
+                <div id="canvas-auth-form">
+                    <input type="password" id="canvas-token" placeholder="Enter Canvas API Token" />
+                    <button id="auth-canvas-btn">Authenticate</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Google Calendar Authentication Section -->
+        <div class="auth-section">
+            <h2>Google Calendar</h2>
+            <div class="auth-item">
+                <div class="auth-header">
+                    <span>Status:</span>
+                    <span id="google-status" class="status">Not connected</span>
+                </div>
+                <button id="auth-google-btn">Connect Google Calendar</button>
+            </div>
+        </div>
+
+        <!-- Sync Section -->
+        <div class="sync-section">
+            <h2>Sync</h2>
+            <div class="sync-controls">
+                <button id="sync-now-btn" disabled>Sync Now</button>
+                <div class="sync-status">
+                    <small>Last sync: <span id="last-sync-time">Never</span></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <button id="open-options-btn">Options</button>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
