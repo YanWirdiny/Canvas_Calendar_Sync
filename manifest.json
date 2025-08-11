@@ -1,17 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Canvas to Google Calendar Sync",
-  "version": "1.0.0",
+  "name": "Canvas Calendar Sync",
+  "version": "1.0",
   "description": "Automatically sync Canvas assignments to Google Calendar",
   "permissions": [
-    "storage",
     "identity",
-    "tabs"
+    "storage"
   ],
   "host_permissions": [
     "*://*.instructure.com/*",
     "https://www.googleapis.com/*"
   ],
+  "oauth2": {
+    "client_id": "740190741545-p8o861ef4alffj7ceio4669lcuf517c7.apps.googleusercontent.com", 
+    "scopes": [
+      "https://www.googleapis.com/auth/calendar"
+    ]
+  },
   "background": {
     "service_worker": "background.js"
   },

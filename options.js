@@ -1,5 +1,5 @@
 // Options page functionality
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Get DOM elements
   const canvasDomainInput = document.getElementById('canvas-domain');
   const calendarSelect = document.getElementById('calendar-select');
@@ -9,6 +9,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveOptionsBtn = document.getElementById('save-options-btn');
   const resetOptionsBtn = document.getElementById('reset-options-btn');
   const statusMessage = document.getElementById('status-message');
+
+  // Fetch calendars from Google
+  try {
+    const calendars = await chrome.runtime.sendMessage({ action: 'fetchGoogleCalendars' });
+    calendars.forEach((calendar) => {
+      const option = document.createElement('option');
+      option.value = calendar.id;
+      option.textContent = calendar.summary;
+      calendarSelect.appendChild(option);
+    });
+
+    // Load the saved calendar ID
+    const { selectedCalendarId } = await chrome.storage.sync.get('selectedCalendarId');
+    calendarSelect.value = selectedCalendarId || 'primary';
+  } catch (error) {
+    console.error('Error loading calendars:', error);
+  }
 
   // Load current options
   loadOptions();

@@ -55,5 +55,24 @@
     </div>
 
     <script src="popup.js"></script>
+    <script>
+        async function loadGoogleStatus() {
+            const { isGoogleAuthenticated } = await chrome.storage.sync.get('isGoogleAuthenticated');
+            const googleStatus = document.getElementById('google-status');
+
+            if (isGoogleAuthenticated) {
+                googleStatus.textContent = 'Connected';
+                googleStatus.classList.add('connected');
+            } else {
+                googleStatus.textContent = 'Not connected';
+                googleStatus.classList.remove('connected');
+            }
+        }
+
+        // Call this function when the popup loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGoogleStatus();
+        });
+    </script>
 </body>
 </html>

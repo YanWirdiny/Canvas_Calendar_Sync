@@ -15,18 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Add event listeners
   authCanvasBtn.addEventListener('click', handleCanvasAuth);
-  authGoogleBtn.addEventListener('click', () => {
-    chrome.identity.getAuthToken({ interactive: true }, function(token) {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        // Show error to user
-        return;
-      }
-      // Save token or notify background.js
-      console.log('Google OAuth token:', token);
-      // You can now use this token to call Google Calendar API
-    });
-  });
+  authGoogleBtn.addEventListener('click', handleGoogleAuth);
   syncNowBtn.addEventListener('click', handleSync);
   openOptionsBtn.addEventListener('click', openOptions);
   
@@ -93,57 +82,53 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Handle Google authentication
   async function handleGoogleAuth() {
+    const authGoogleBtn = document.getElementById('auth-google-btn');
+    const googleStatus = document.getElementById('google-status');
+  
     // Show loading state
     authGoogleBtn.disabled = true;
     authGoogleBtn.textContent = 'Connecting...';
-    
+  
     try {
-      // Send authentication request to background script
-      const response = await chrome.runtime.sendMessage({
-        action: 'authenticateGoogle'
+      // Send a message to the background script to authenticate Google
+      chrome.runtime.sendMessage({ action: 'authenticateGoogle' }, (response) => {
+        if (response.success) {
+          googleStatus.textContent = 'Connected';
+          googleStatus.classList.add('connected');
+          alert('Google account connected successfully!');
+        } else {
+          googleStatus.textContent = 'Not connected';
+          googleStatus.classList.remove('connected');
+          alert(`Google authentication failed: ${response.error}`);
+        }
+  
+        // Enable the button again
+        authGoogleBtn.disabled = false;
+        authGoogleBtn.textContent = 'Connect Google Calendar';
       });
-      
-      if (response.success) {
-        updateGoogleStatus(true);
-      } else {
-        updateGoogleStatus(false, response.error || 'Authentication failed');
-      }
     } catch (error) {
-      updateGoogleStatus(false, error.message);
-    } finally {
-      // Reset button
+      console.error('Error during Google authentication:', error);
       authGoogleBtn.disabled = false;
       authGoogleBtn.textContent = 'Connect Google Calendar';
-      // Check if sync button should be enabled
-      updateSyncButton();
     }
   }
   
   // Handle sync action
   async function handleSync() {
-    // Show loading state
     syncNowBtn.disabled = true;
     syncNowBtn.textContent = 'Syncing...';
-    
+
     try {
-      // Send sync request to background script
-      const response = await chrome.runtime.sendMessage({
-        action: 'syncAssignments'
-      });
-      
+      const response = await chrome.runtime.sendMessage({ action: 'syncAssignments' });
       if (response.success) {
-        // Update UI with success message
         lastSyncTime.textContent = new Date().toLocaleString();
-        // Update storage
         await chrome.storage.sync.set({ lastSyncTime: new Date().toISOString() });
       } else {
         console.error('Sync failed:', response.error);
-        // Could display error in UI
       }
     } catch (error) {
       console.error('Sync error:', error);
     } finally {
-      // Reset button
       syncNowBtn.disabled = false;
       syncNowBtn.textContent = 'Sync Now';
     }
