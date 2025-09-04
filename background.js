@@ -138,36 +138,24 @@ async function getGoogleAuthToken(interactive = false) {
 // Example: Use this helper in your sync function for background API calls
 async function syncAssignmentsToCalendar() {
   try {
-    console.log('Starting sync of assignments to Google Calendar...');
+    console.log('Starting sync of assignments to Google Tasks...');
     const assignments = await fetchCanvasAssignments();
 
-    if (assignments.length === 0) {
-      console.log('No assignments found in Canvas.');
-      return { message: 'No assignments to sync' }; // Return a message indicating no assignments
-    }
-
     for (const assignment of assignments) {
-      const eventDetails = {
-        summary: assignment.name,
-        description: assignment.description || 'No description provided.',
-        start: {
-          dateTime: assignment.due_at, // Ensure this is in ISO 8601 format
-          timeZone: 'America/New_York' // Adjust as needed
-        },
-        end: {
-          dateTime: assignment.due_at, // Example: Use the same time for start and end
-          timeZone: 'America/New_York'
-        }
+      // Create a task for each assignment
+      const taskDetails = {
+        title: assignment.name || 'Untitled Assignment',
+        notes: assignment.description || 'No description provided.',
+        due: assignment.due_at || null // Use due_at if available, otherwise leave it null
       };
 
-      await createGoogleCalendarEvent(eventDetails);
+      console.log('Creating task for assignment:', taskDetails);
+      await createGoogleTask(taskDetails);
     }
 
-    console.log('All assignments synced successfully!');
-    return { message: 'Sync completed successfully' };
+    console.log('All assignments synced successfully as tasks!');
   } catch (error) {
-    console.error('Error syncing assignments to Google Calendar:', error);
-    return { message: 'Sync failed', error: error.toString() };
+    console.error('Error syncing assignments to Google Tasks:', error);
   }
 }
 
@@ -205,6 +193,36 @@ async function createGoogleCalendarEvent(eventDetails) {
   }
 }
 
+// Function to create a Google Task
+async function createGoogleTask(taskDetails) {
+  try {
+    // Get the Google OAuth token
+    const token = await getGoogleAuthToken(false); // Use non-interactive mode for background calls
+    if (!token) throw new Error('No Google auth token available');
+
+    // Make the API call to create the task
+    const response = await fetch('https://tasks.googleapis.com/tasks/v1/lists/@default/tasks', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(taskDetails)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create task: ${response.status}`);
+    }
+
+    const task = await response.json();
+    console.log('Task created successfully:', task);
+    return task;
+  } catch (error) {
+    console.error('Error creating Google Task:', error);
+    throw error;
+  }
+}
+
 // Function to fetch assignments from Canvas
 async function fetchCanvasAssignments() {
   try {
@@ -214,23 +232,46 @@ async function fetchCanvasAssignments() {
       throw new Error('Canvas domain or token is missing');
     }
 
-    // Fetch the list of courses
-    const coursesResponse = await fetch(`https://${canvasDomain}/api/v1/courses`, {
-      headers: {
-        'Authorization': `Bearer ${canvasToken}`
-      }
-    });
+    // Fetch all active courses (handle pagination)
+    let courses = [];
+    let nextPage = `https://${canvasDomain}/api/v1/courses?enrollment_state=active&include[]=term&include[]=total_students`;
+    while (nextPage) {
+      const response = await fetch(nextPage, {
+        headers: {
+          'Authorization': `Bearer ${canvasToken}`
+        }
+      });
 
-    if (!coursesResponse.ok) {
-      throw new Error(`Failed to fetch courses: ${coursesResponse.status}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch courses: ${response.status}`);
+      }
+
+      const pageCourses = await response.json();
+      courses = courses.concat(pageCourses);
+
+      // Check for the "next" link in the response headers
+      const linkHeader = response.headers.get('Link');
+      nextPage = null;
+      if (linkHeader) {
+        const links = linkHeader.split(',');
+        for (const link of links) {
+          const [url, rel] = link.split(';');
+          if (rel.includes('next')) {
+            nextPage = url.trim().replace(/<|>/g, ''); // Extract the URL
+          }
+        }
+      }
     }
 
-    const courses = await coursesResponse.json();
-    console.log('Courses fetched from Canvas:', courses);
+    console.log('All active courses fetched from Canvas:', courses);
 
-    // Fetch assignments for each course
+    // Filter out courses with access_restricted_by_date set to true
+    const activeCourses = courses.filter(course => !course.access_restricted_by_date);
+    console.log('Active courses (not restricted by date):', activeCourses);
+
+    // Fetch assignments for each active course
     const assignments = [];
-    for (const course of courses) {
+    for (const course of activeCourses) {
       try {
         const assignmentsResponse = await fetch(`https://${canvasDomain}/api/v1/courses/${course.id}/assignments`, {
           headers: {
