@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('Background received message:', message);
   
   if (message.action === 'authenticateCanvas') {
-    authenticateCanvas(message.token)
+    authenticateCanvas(message.token) 
       .then(result => sendResponse({ success: result }))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true; // Indicates async response
@@ -141,6 +141,19 @@ async function syncAssignmentsToCalendar() {
     console.log('Starting sync of assignments to Google Tasks...');
     const assignments = await fetchCanvasAssignments();
 
+
+    // check for  dupllicates  assignments.
+    const existingTasks = await fetchExistingGoogleTasks();
+    const existingTaskTitles = new Set(existingTasks.map(task => task.title));
+
+    //skip if assignment already exists as a task 
+    for(const assignment of assignments) {
+      if(existingTaskTitles.has(assignment.name)) {
+        console.log(`Skipping duplicate assignment: ${assignment.name}`);
+        assignments.splice(assignments.indexOf(assignment), 1);
+      }
+    }
+
     for (const assignment of assignments) {
       // Create a task for each assignment
       const taskDetails = {
@@ -196,6 +209,8 @@ async function createGoogleCalendarEvent(eventDetails) {
 // Function to create a Google Task
 async function createGoogleTask(taskDetails) {
   try {
+    console.log('Creating task with details:', taskDetails);
+
     // Get the Google OAuth token
     const token = await getGoogleAuthToken(false); // Use non-interactive mode for background calls
     if (!token) throw new Error('No Google auth token available');
@@ -211,6 +226,8 @@ async function createGoogleTask(taskDetails) {
     });
 
     if (!response.ok) {
+      const errorBody = await response.text(); // Log the error response body
+      console.error('Google Tasks API error:', errorBody);
       throw new Error(`Failed to create task: ${response.status}`);
     }
 
@@ -322,6 +339,34 @@ async function fetchGoogleCalendars() {
     return data.items; // List of calendars
   } catch (error) {
     console.error('Error fetching Google Calendars:', error);
+    throw error;
+  }
+}
+
+// Function to fetch existing Google Tasks
+async function fetchExistingGoogleTasks() {
+  try {
+    // Get the Google OAuth token
+    const token = await getGoogleAuthToken(false); // Use non-interactive mode for background calls
+    if (!token) throw new Error('No Google auth token available');
+
+    // Fetch the list of tasks from the default task list
+    const response = await fetch('https://tasks.googleapis.com/tasks/v1/lists/@default/tasks', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch tasks: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Existing Google Tasks:', data.items || []);
+    return data.items || []; // Return the list of tasks (or an empty array if none exist)
+  } catch (error) {
+    console.error('Error fetching Google Tasks:', error);
     throw error;
   }
 }
