@@ -141,21 +141,18 @@ async function syncAssignmentsToCalendar() {
     console.log('Starting sync of assignments to Google Tasks...');
     const assignments = await fetchCanvasAssignments();
 
-
-    // check for  dupllicates  assignments.
+    // Fetch existing tasks from Google Tasks
     const existingTasks = await fetchExistingGoogleTasks();
-    const existingTaskTitles = new Set(existingTasks.map(task => task.title));
-
-    //skip if assignment already exists as a task 
-    for(const assignment of assignments) {
-      if(existingTaskTitles.has(assignment.name)) {
-        console.log(`Skipping duplicate assignment: ${assignment.name}`);
-        assignments.splice(assignments.indexOf(assignment), 1);
-      }
-    }
+    const existingTaskTitles = new Set(existingTasks.map(task => task.title)); // Create a set of existing task titles
 
     for (const assignment of assignments) {
-      // Create a task for each assignment
+      // Skip creating a task if it already exists
+      if (existingTaskTitles.has(assignment.name)) {
+        console.log(`Task "${assignment.name}" already exists. Skipping.`);
+        continue;
+      }
+
+      // Create a task for each new assignment
       const taskDetails = {
         title: assignment.name || 'Untitled Assignment',
         notes: assignment.description || 'No description provided.',
