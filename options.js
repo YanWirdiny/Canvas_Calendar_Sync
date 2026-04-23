@@ -1,5 +1,12 @@
 // Options page functionality
 document.addEventListener('DOMContentLoaded', async () => {
+  // Auth guard: send unauthenticated users back to login
+  const { isGoogleAuthenticated } = await chrome.storage.sync.get('isGoogleAuthenticated');
+  if (!isGoogleAuthenticated) {
+    window.location.href = chrome.runtime.getURL('auth.html');
+    return;
+  }
+
   // Get DOM elements
   const canvasDomainInput = document.getElementById('canvas-domain');
   const calendarSelect = document.getElementById('calendar-select');
@@ -8,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const overwriteExistingCheckbox = document.getElementById('overwrite-existing');
   const saveOptionsBtn = document.getElementById('save-options-btn');
   const resetOptionsBtn = document.getElementById('reset-options-btn');
+  const signOutBtn = document.getElementById('sign-out-btn');
   const statusMessage = document.getElementById('status-message');
 
   // Fetch calendars from Google
@@ -33,6 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Add event listeners
   saveOptionsBtn.addEventListener('click', saveOptions);
   resetOptionsBtn.addEventListener('click', resetOptions);
+  signOutBtn.addEventListener('click', async () => {
+    try { await chrome.runtime.sendMessage({ action: 'signOut' }); } catch { /* ignore */ }
+    window.location.href = chrome.runtime.getURL('auth.html');
+  });
 
   // Load options from storage
   async function loadOptions() {

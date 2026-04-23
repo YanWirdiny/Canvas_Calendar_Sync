@@ -1,0 +1,107 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.auth-wrapper {
+    width: 100%;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.brand-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.brand h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a73e8;
+}
+
+.tagline {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 36px;
+    line-height: 1.5;
+}
+
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #dadce0;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.google-btn:hover {
+    background: #f8f9fa;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.google-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.google-btn.loading span::after {
+    content: '...';
+}
+
+.google-icon {
+    flex-shrink: 0;
+}
+
+.error-msg {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #d93025;
+    background: #fce8e6;
+    border-radius: 6px;
+    padding: 10px 14px;
+}
+
+.hidden {
+    display: none;
+}

@@ -96,10 +96,17 @@ button:disabled {
 
 .footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
 }
 
 #open-options-btn {
   background-color: transparent;
   color: #1a73e8;
+}
+
+.sign-out-btn {
+  background-color: transparent;
+  color: #c5221f;
+  margin-left: auto;
 }

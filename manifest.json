@@ -14,7 +14,8 @@
   "oauth2": {
     "client_id": "740190741545-p8o861ef4alffj7ceio4669lcuf517c7.apps.googleusercontent.com", 
     "scopes": [
-      "https://www.googleapis.com/auth/calendar"
+      "https://www.googleapis.com/auth/calendar",
+      "https://www.googleapis.com/auth/tasks"
     ]
   },
   "background": {
@@ -36,7 +37,7 @@
     
   },
   "options_page": "options.html",
-  "contenhwb(214 10% 9%)ts": [
+  "content_scripts": [
     {
       "matches": ["*://*.instructure.com/*"],
       "js": ["content.js"]

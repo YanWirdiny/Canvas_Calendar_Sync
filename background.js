@@ -46,7 +46,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     fetchGoogleCalendars()
       .then((calendars) => sendResponse(calendars))
       .catch((error) => sendResponse({ error: error.message }));
-    return true; // Indicates async response
+    return true;
+  }
+
+  if (message.action === 'signOut') {
+    chrome.identity.getAuthToken({ interactive: false }, (token) => {
+      const clearStorage = () =>
+        chrome.storage.sync.set({
+          isGoogleAuthenticated: false,
+          googleAuthToken: '',
+          isCanvasAuthenticated: false,
+          canvasToken: ''
+        }).then(() => sendResponse({ success: true }));
+
+      if (token) {
+        chrome.identity.removeCachedAuthToken({ token }, clearStorage);
+      } else {
+        clearStorage();
+      }
+    });
+    return true;
   }
 });
 

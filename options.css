@@ -109,13 +109,23 @@ button.primary:hover {
   background-color: #1558b9;
 }
 
-button:not(.primary) {
+button:not(.primary):not(.danger) {
   background-color: #f1f3f4;
   color: #333;
 }
 
-button:not(.primary):hover {
+button:not(.primary):not(.danger):hover {
   background-color: #e8eaed;
+}
+
+button.danger {
+  background-color: #fce8e6;
+  color: #c5221f;
+  margin-left: auto;
+}
+
+button.danger:hover {
+  background-color: #f5c6cb;
 }
 
 button:disabled {
